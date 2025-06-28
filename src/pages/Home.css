@@ -2,3 +2,59 @@
   height: min-content;
   overflow: hidden;
 }
+
+/* Premium Button Styles */
+.premium-button {
+  --color: #ffd700;
+  position: relative;
+  margin-right: 8px;
+  animation: subtle-glow 2s ease-in-out infinite alternate;
+}
+
+.premium-button ion-icon {
+  font-size: 20px;
+}
+
+.premium-button:hover {
+  --color: #ffed4a;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+.export-counter {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff3333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 10;
+}
+
+@keyframes subtle-glow {
+  from {
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  }
+}
+
+/* Export limit warning */
+.export-warning {
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  color: white;
+  padding: 12px;
+  margin: 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(254, 202, 87, 0.3);
+}

@@ -4,17 +4,59 @@ import Papa from 'papaparse';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { isPlatform } from '@ionic/react';
 import * as AppGeneral from '../components/socialcalc/index.js';
+import { purchaseService } from './PurchaseService';
 
 export class ExportService {
     /**
+   * Check if user can export (premium feature check)
+   */
+  static async canExport(): Promise<{ canExport: boolean; message?: string }> {
+    await purchaseService.initialize();
+    
+    const canExport = purchaseService.canUseFeature('export');
+    const remaining = purchaseService.getRemainingExports();
+    
+    if (!canExport) {
+      if (remaining === 0) {
+        return {
+          canExport: false,
+          message: 'You have reached your export limit. Upgrade to Premium for unlimited exports.'
+        };
+      }
+    }
+    
+    return { canExport: true };
+  }
+
+  /**
+   * Use an export (decrement counter for free users)
+   */
+  static async useExport(): Promise<boolean> {
+    await purchaseService.initialize();
+    return await purchaseService.useExport();
+  }
+
+  /**
    * Export current invoice as PDF
    */
   static async exportToPDF(fileName: string = 'invoice'): Promise<{ success: boolean; message: string; path?: string }> {
     try {
+      // Check if user can export
+      const { canExport, message } = await this.canExport();
+      if (!canExport) {
+        return { success: false, message: message || 'Export not allowed' };
+      }
+
       // Get the spreadsheet container
       const element = document.getElementById('tableeditor');
       if (!element) {
         throw new Error('Spreadsheet element not found');
+      }
+
+      // Use an export
+      const exportUsed = await this.useExport();
+      if (!exportUsed) {
+        return { success: false, message: 'Failed to process export' };
       }
 
       // Create canvas from the spreadsheet
@@ -101,11 +143,23 @@ export class ExportService {
    */
   static async exportToCSV(fileName: string = 'invoice'): Promise<{ success: boolean; message: string; path?: string }> {
     try {
+      // Check if user can export
+      const { canExport, message } = await this.canExport();
+      if (!canExport) {
+        return { success: false, message: message || 'Export not allowed' };
+      }
+
       // Get spreadsheet data
       const spreadsheetData = AppGeneral.getSpreadsheetData();
       
       if (!spreadsheetData || !spreadsheetData.cells) {
         throw new Error('No spreadsheet data found');
+      }
+
+      // Use an export
+      const exportUsed = await this.useExport();
+      if (!exportUsed) {
+        return { success: false, message: 'Failed to process export' };
       }
 
       // Convert spreadsheet data to CSV format
